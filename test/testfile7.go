@@ -34,3 +34,4 @@ func processStripePayment(apiKey string) {
 	// Simulate Stripe payment processing
 	fmt.Println("Processing payment with Stripe API key:", apiKey)
 }
+#test
