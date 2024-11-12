@@ -1,0 +1,60 @@
+name: Gosec scan
+
+permissions:
+  contents: read        # Allows access to the repository contents
+  actions: write        # Needed for uploading SARIF results
+  security-events: write # Allows posting security alerts
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+      
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@v2.17.0  # Pin to a stable release
+        with:
+          args: '-no-fail -fmt sarif -out results.sarif -stdout results.sarif ./...'
+
+      - name: Check if results.sarif exists
+        run: |
+          if [ ! -f results.sarif ]; then
+            echo "results.sarif not found!"
+            exit 1
+          fi
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      - name: Fail if error/critical vulnerabilities found
+        run: |
+          if grep -q "Severity: CRITICAL" results.sarif; then
+            echo "Rule - Severity: CRITICAL triggered. Merge blocked."
+            exit 1
+          elif grep -q "Severity: HIGH" results.sarif; then
+            echo "Rule - Severity: HIGH triggered. Merge blocked."
+            exit 1
+          elif grep -q "\"level\": \"error\"" results.sarif; then
+            echo "level:error vulnerabilities found. Merge blocked."
+            exit 1
+          elif grep -q "Severity: MEDIUM" results.sarif; then
+            echo "Gosec scan passed, Note: Rule - Severity: MEDIUM triggered"
+          elif grep -q "\"level\": \"warning\"" results.sarif; then
+            echo "Gosec scan passed, Note: level:error vulnerabilities found."
+          else
+            echo "Gosec scan passed."
+          fi
