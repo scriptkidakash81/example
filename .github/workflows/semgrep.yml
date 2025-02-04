@@ -32,3 +32,12 @@ jobs:
         run: |
          echo "Displaying raw Semgrep results..."
          cat pretty-results.json
+         
+      - name: Fail if error/critical vulnerabilities found
+        run: |
+           if grep -q '"level": "error"' pretty-results.json; then
+             echo "Error or critical vulnerabilities found. Merge blocked."
+             exit 1
+           else
+             echo "Semgrep scan passed."
+           fi
