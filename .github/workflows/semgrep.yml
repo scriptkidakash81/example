@@ -35,7 +35,7 @@ jobs:
          
       - name: Fail if error/critical vulnerabilities found
         run: |
-           if grep -q '"level": "error"' pretty-results.json; then
+           if grep -q '"severity": "ERROR"' pretty-results.json; then
              echo "Error or critical vulnerabilities found. Merge blocked."
              exit 1
            else
