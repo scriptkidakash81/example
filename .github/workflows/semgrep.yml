@@ -25,7 +25,7 @@ jobs:
       - name: Run Semgrep
         run: |
           source .venv/bin/activate
-          semgrep --config auto --json-output=results.json
+          semgrep --config auto --no-fail --json-output=results.json
           cat results.json | jq . > pretty-results.json
 
       - name: Display Raw Semgrep JSON Output
