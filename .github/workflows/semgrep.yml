@@ -1,0 +1,33 @@
+name: Semgrep
+
+# Run workflow each time code is pushed to your repository.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Semgrep and jq
+        run: |
+          sudo apt install python3-venv jq
+          python3 -m venv .venv
+          .venv/bin/pip install semgrep
+
+      - name: Run Semgrep
+        run: |
+          source .venv/bin/activate
+          semgrep --config auto --json . > results.json
+
+      - name: Display Raw Semgrep JSON Output
+        run: |
+         echo "Displaying raw Semgrep results..."
+         cat results.json
