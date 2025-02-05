@@ -1,6 +1,5 @@
 name: Semgrep
 
-# Run workflow each time code is pushed to your repository.
 on:
   push:
     branches:
@@ -41,3 +40,24 @@ jobs:
            else
              echo "Semgrep scan passed."
            fi
+
+      - name: Add comment on PR if findings are found
+        if: failure()  # Only run if the previous step failed
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const comment = `**Semgrep Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: prNumber,
+              body: comment
+            });
+            
+            // Optional: Block the merge by updating the PR status
+            await github.rest.pulls.update({
+              ...context.repo,
+              pull_number: prNumber,
+              state: 'closed' // You can use 'closed' to block it from being merged
+            });
