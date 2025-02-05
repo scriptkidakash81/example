@@ -12,10 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write  # Allow writing to PRs
-      issues: write         # Allow creating comments on issues
-
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v3
@@ -32,22 +28,22 @@ jobs:
           echo "Displaying raw GoSec results..."
           cat results.json
 
-      - name: Inspect the Structure of JSON 
+      - name: Inspect the Structure of JSON
         run: |
           # Let's display the 'Issues' array to understand its structure
           echo "Inspecting the Issues structure..."
           jq '.Issues' results.json
 
-      - name: Add comment on PR if HIGH vulnerabilities are found
+      - name: Check if HIGH vulnerabilities are found and post comment to PR
         run: |
-          if jq '.Issues | map(select(.Severity == "HIGH")) | length > 0' results.json; then
+          if jq '.Issues | map(select(.Severity == "HIGH")) | length > 0' results.json > /dev/null; then
             echo "HIGH vulnerabilities found. Adding comment to PR."
             comment="**GoSec Findings:** HIGH vulnerabilities found in the code. Please address them before merging."
           else
             echo "No HIGH vulnerabilities found. Scan passed."
             comment="**GoSec Scan Successful:** No HIGH vulnerabilities found in the code."
           fi
-          
+
           # Extract PR number from the GitHub context (only for PR-related events)
           pr_number=${{ github.event.pull_request.number }}
 
