@@ -26,7 +26,7 @@ jobs:
         run: |
           source .venv/bin/activate
           semgrep --config auto --severity ERROR --json-output=results.json --no-error
-          cat results.json | jq > pretty-results.json
+          cat results.json | jq .results > pretty-results.json
 
       - name: Display Raw Semgrep JSON Output
         run: |
