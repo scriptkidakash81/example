@@ -34,18 +34,29 @@ jobs:
           echo "Inspecting the Issues structure..."
           jq '.Issues' results.json
 
-      - name: Check if HIGH vulnerabilities are found and post comment to PR
-        run: |
-          if jq '.Issues | map(select(.Severity == "HIGH")) | length > 0' results.json > /dev/null; then
-            echo "HIGH vulnerabilities found. Adding comment to PR."
-            comment="**GoSec Findings:** HIGH vulnerabilities found in the code. Please address them before merging."
-          else
-            echo "No HIGH vulnerabilities found. Scan passed."
-            comment="**GoSec Scan Successful:** No HIGH vulnerabilities found in the code."
-          fi
+      - name: Add comment on PR if findings are found
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const fs = require('fs');
+            const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+            const highFindings = results.Issues.filter(issue => issue.severity === 'HIGH');
 
-          # Extract PR number from the GitHub context (only for PR-related events)
-          pr_number=${{ github.event.pull_request.number }}
-
-          # Add comment to the PR using GitHub API (using the default GITHUB_TOKEN)
-          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"body": "'"$comment"'"}' https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/$pr_number/comments
+            // Comment if high-severity findings are found
+            if (highFindings.length > 0) {
+              const comment = `**GoSec Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: prNumber,
+                body: comment
+              });
+            } else {
+              // If no findings, comment that the scan passed
+              const comment = `**GoSec Scan Passed:** No critical vulnerabilities found.`;
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: prNumber,
+                body: comment
+              });
+            }
