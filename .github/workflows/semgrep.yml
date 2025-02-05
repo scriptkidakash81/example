@@ -62,5 +62,5 @@ jobs:
             await github.rest.pulls.update({
               ...context.repo,
               pull_number: prNumber,
-              state: 'closed' // You can use 'closed' to block it from being merged
+              state: 'open' // You can use 'closed' to block it from being merged
             });
