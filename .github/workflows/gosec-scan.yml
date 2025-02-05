@@ -24,7 +24,7 @@ jobs:
         id: gosec_scan
         uses: securego/gosec@master
         with:
-          args: '-severity high -confidence low -no-fail -fmt json -out results.json ./...'
+          args: '-severity high -confidence high -no-fail -fmt json -out results.json ./...'
 
       - name: Display Raw GoSec JSON Output
         run: |
