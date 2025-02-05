@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write  # Grant permission to write comments on issues and PRs
+  pull-requests: write  # Grant permission to write comments on PRs
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,7 +24,6 @@ jobs:
         id: gosec_scan
         uses: securego/gosec@master
         with:
-          # Running GoSec with arguments to filter on severity and confidence
           args: '-severity high -confidence high -no-fail -fmt json -out results.json ./...'
 
       - name: Display Raw GoSec JSON Output
@@ -38,25 +41,30 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const prNumber = context.payload.pull_request.number;
-            const fs = require('fs');
-            const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
-            const highFindings = results.Issues.filter(issue => issue.severity === 'HIGH');
+            // Ensure the context has a pull_request
+            if (context.payload.pull_request) {
+              const prNumber = context.payload.pull_request.number;
+              const fs = require('fs');
+              const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
+              const highFindings = results.Issues.filter(issue => issue.severity === 'HIGH');
 
-            // Comment if high-severity findings are found
-            if (highFindings.length > 0) {
-              const comment = `**GoSec Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number: prNumber,
-                body: comment
-              });
+              // Comment if high-severity findings are found
+              if (highFindings.length > 0) {
+                const comment = `**GoSec Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: comment
+                });
+              } else {
+                // If no findings, comment that the scan passed
+                const comment = `**GoSec Scan Passed:** No critical vulnerabilities found.`;
+                await github.rest.issues.createComment({
+                  ...context.repo,
+                  issue_number: prNumber,
+                  body: comment
+                });
+              }
             } else {
-              // If no findings, comment that the scan passed
-              const comment = `**GoSec Scan Passed:** No critical vulnerabilities found.`;
-              await github.rest.issues.createComment({
-                ...context.repo,
-                issue_number: prNumber,
-                body: comment
-              });
+              console.log("This workflow wasn't triggered by a pull request, so no comment will be added.");
             }
