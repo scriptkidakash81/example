@@ -24,7 +24,7 @@ jobs:
         id: gosec_scan
         uses: securego/gosec@master
         with:
-          args: '-severity medium -no-fail -fmt json -out results.json ./...'
+          args: '-severity high -confidence low -no-fail -fmt json -out results.json ./...'
 
       - name: Display Raw GoSec JSON Output
         run: |
@@ -46,11 +46,11 @@ jobs:
               const prNumber = context.payload.pull_request.number;
               const fs = require('fs');
               const results = JSON.parse(fs.readFileSync('results.json', 'utf8'));
-              const highFindings = results.Issues.filter(issue => issue.severity === 'MEDIUM');
+              const highFindings = results.Issues.filter(issue => issue.severity === 'HIGH');
 
               // Comment if high-severity findings are found
               if (highFindings.length > 0) {
-                const comment = `**GoSec Findings:** Medium vulnerabilities found in the code. Please address them before merging.`;
+                const comment = `**GoSec Findings:** Vulnerabilities are found in the code. Please address them before merging.`;
                 await github.rest.issues.createComment({
                   ...context.repo,
                   issue_number: prNumber,
