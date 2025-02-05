@@ -56,14 +56,6 @@ jobs:
                   issue_number: prNumber,
                   body: comment
                 });
-              } else {
-                // If no findings, comment that the scan passed
-                const comment = `**GoSec Scan Passed:** No critical vulnerabilities found.`;
-                await github.rest.issues.createComment({
-                  ...context.repo,
-                  issue_number: prNumber,
-                  body: comment
-                });
               }
             } else {
               console.log("This workflow wasn't triggered by a pull request, so no comment will be added.");
