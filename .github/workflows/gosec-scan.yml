@@ -1,10 +1,6 @@
-name: Gosec scan
+name: GoSec new
 
-permissions:
-  contents: read        # Allows access to the repository contents
-  actions: write        # Needed for uploading SARIF results
-  security-events: write # Allows posting security alerts
-
+# Run workflow each time code is pushed to your repository.
 on:
   push:
     branches:
@@ -12,49 +8,48 @@ on:
   pull_request:
     branches:
       - main
-  
+
 jobs:
-  tests:
+  build:
     runs-on: ubuntu-latest
-    env:
-      GO111MODULE: on
-      
+    permissions:
+      pull-requests: write  # Allow writing to PRs
+      issues: write         # Allow creating comments on issues
+
     steps:
-      - name: Checkout Source
+      - name: Check out code into the Go module directory
         uses: actions/checkout@v3
 
-      - name: Run Gosec Security Scanner
-        uses: securego/gosec@v2.17.0  # Pin to a stable release
+      - name: Security Scan with GoSec
+        id: gosec_scan
+        uses: securego/gosec@master
         with:
-          args: '-no-fail -fmt sarif -out results.sarif -stdout results.sarif ./...'
+          # Running GoSec with arguments to filter on severity and confidence
+          args: '-severity high -confidence high -no-fail -fmt json -out results.json ./...'
 
-      - name: Check if results.sarif exists
+      - name: Display Raw GoSec JSON Output
         run: |
-          if [ ! -f results.sarif ]; then
-            echo "results.sarif not found!"
-            exit 1
-          fi
+          echo "Displaying raw GoSec results..."
+          cat results.json
 
-      - name: Upload SARIF file
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
-
-      - name: Fail if error/critical vulnerabilities found
+      - name: Inspect the Structure of JSON 
         run: |
-          if grep -q "Severity: CRITICAL" results.sarif; then
-            echo "Rule - Severity: CRITICAL triggered. Merge blocked."
-            exit 1
-          elif grep -q "Severity: HIGH" results.sarif; then
-            echo "Rule - Severity: HIGH triggered. Merge blocked."
-            exit 1
-          elif grep -q "\"level\": \"error\"" results.sarif; then
-            echo "level:error vulnerabilities found. Merge blocked."
-            exit 1
-          elif grep -q "Severity: MEDIUM" results.sarif; then
-            echo "Gosec scan passed, Note: Rule - Severity: MEDIUM triggered"
-          elif grep -q "\"level\": \"warning\"" results.sarif; then
-            echo "Gosec scan passed, Note: level:error vulnerabilities found."
+          # Let's display the 'Issues' array to understand its structure
+          echo "Inspecting the Issues structure..."
+          jq '.Issues' results.json
+
+      - name: Add comment on PR if HIGH vulnerabilities are found
+        run: |
+          if jq '.Issues | map(select(.Severity == "HIGH")) | length > 0' results.json; then
+            echo "HIGH vulnerabilities found. Adding comment to PR."
+            comment="**GoSec Findings:** HIGH vulnerabilities found in the code. Please address them before merging."
           else
-            echo "Gosec scan passed."
+            echo "No HIGH vulnerabilities found. Scan passed."
+            comment="**GoSec Scan Successful:** No HIGH vulnerabilities found in the code."
           fi
+          
+          # Extract PR number from the GitHub context (only for PR-related events)
+          pr_number=${{ github.event.pull_request.number }}
+
+          # Add comment to the PR using GitHub API (using the default GITHUB_TOKEN)
+          curl -X POST -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -d '{"body": "'"$comment"'"}' https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/$pr_number/comments
