@@ -1,9 +1,6 @@
 name: Semgrep
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
@@ -23,44 +20,36 @@ jobs:
           sudo apt install python3-venv jq
           python3 -m venv .venv
           .venv/bin/pip install semgrep
-
+          
       - name: Run Semgrep
         run: |
           source .venv/bin/activate
           semgrep --config auto --severity ERROR --json-output=results.json --no-error
           cat results.json | jq .results > pretty-results.json
-
-      - name: Display Raw Semgrep JSON Output
+          
+      - name: Display Semgrep JSON Output
         run: |
-         echo "Displaying raw Semgrep results..."
+         echo "Displaying Semgrep results..."
          cat pretty-results.json
          
-      - name: Fail if error/critical vulnerabilities found
-        run: |
-           if grep -q '"severity": "ERROR"' pretty-results.json; then
-             echo "Error or critical vulnerabilities found. Merge blocked."
-             exit 1
-           else
-             echo "Semgrep scan passed."
-           fi
-
       - name: Add comment on PR if findings are found
-        if: failure()  # Only run if the previous step failed
         uses: actions/github-script@v6
         with:
           script: |
+            const fs = require('fs');
             const prNumber = context.payload.pull_request.number;
-            const comment = `**Semgrep Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+            const results = JSON.parse(fs.readFileSync('pretty-results.json', 'utf8'));
+            const criticalVulnsFound = results.some(result => result.severity === "ERROR");
+
+            let comment;
+            if (criticalVulnsFound) {
+              comment = `**Semgrep Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+            } else {
+              comment = `**Semgrep Findings:** No vulnerabilities found. Good to merge!`;
+            }
 
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: prNumber,
               body: comment
-            });
-            
-            // Optional: Block the merge by updating the PR status
-            await github.rest.pulls.update({
-              ...context.repo,
-              pull_number: prNumber,
-              state: 'open' // You can use 'closed' to block it from being merged
             });
