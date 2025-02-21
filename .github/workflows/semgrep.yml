@@ -9,8 +9,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write # Give write permission to PRs
-      issues: write
+      pull-requests: write  # Allow commenting on PRs
+      issues: write          # For creating/updating comments
+	
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -20,34 +21,50 @@ jobs:
           sudo apt install python3-venv jq
           python3 -m venv .venv
           .venv/bin/pip install semgrep
-          
+		
       - name: Run Semgrep
         run: |
           source .venv/bin/activate
-          semgrep --config auto --severity ERROR --json-output=results.json --no-error
+          semgrep --config auto --json-output=results.json --no-error
           cat results.json | jq .results > pretty-results.json
-          
+		
       - name: Display Semgrep JSON Output
         run: |
          echo "Displaying Semgrep results..."
          cat pretty-results.json
          
-      - name: Add comment on PR if findings are found
+      - name: Check Semgrep Results and Add Comment on PR
+        id: check_and_comment
+        run: |
+          # Check for findings in Semgrep output
+          if grep -q '"severity": "ERROR"' pretty-results.json; then
+            echo "Warnings found"
+            FINDINGS=true
+          else
+            echo "No vulnerabilities found"
+            FINDINGS=false
+          fi
+
+      - name: Add Comment on PR if vulnerabilities found
+        if: ${{ steps.check_and_comment.outputs.FINDINGS == 'true' }}
         uses: actions/github-script@v6
         with:
           script: |
-            const fs = require('fs');
             const prNumber = context.payload.pull_request.number;
-            const results = JSON.parse(fs.readFileSync('pretty-results.json', 'utf8'));
-            const criticalVulnsFound = results.some(result => result.severity === "ERROR");
+            const comment = `**Semgrep Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
+            await github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: prNumber,
+              body: comment
+            });
 
-            let comment;
-            if (criticalVulnsFound) {
-              comment = `**Semgrep Findings:** Critical vulnerabilities found in the code. Please address them before merging.`;
-            } else {
-              comment = `**Semgrep Findings:** No vulnerabilities found. Good to merge!`;
-            }
-
+      - name: Add Comment on PR if scan passes
+        if: ${{ steps.check_and_comment.outputs.FINDINGS == 'false' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const comment = `Semgrep scan passed. No vulnerabilities found.`;
             await github.rest.issues.createComment({
               ...context.repo,
               issue_number: prNumber,
