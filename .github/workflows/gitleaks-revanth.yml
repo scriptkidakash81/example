@@ -24,3 +24,6 @@ jobs:
       uses: gitleaks/gitleaks-action@v2
       with:
         config-path: .github/gitleaks.toml  # Optional: Use your own config
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
