@@ -1,21 +1,17 @@
-name: Gitleaks Secret Scan
-
+name: gitleaks-action-HEAD
 on:
-  pull_request:
-    branches: [main]
+  workflow_call:
 
 jobs:
-  gitleaks:
-    name: Run Gitleaks Scan
+  scan:
+    name: gitleaks-action-HEAD
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        fetch-depth: 0  # Important to scan entire git history
-
-    - name: Run Gitleaks
-      uses: gitleaks/gitleaks-action@v2
-      with:
-        config-path: .github/gitleaks.toml  # Optional: Use your own config
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+      - uses: ./ # Runs the action that's in the root directory of the repo checked out above. i.e. This action itself.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
