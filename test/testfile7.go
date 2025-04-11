@@ -7,13 +7,13 @@ import (
 
 func main() {
 	// Vulnerability: Hardcoded credentials - AWS API Key
-	awsAPIKey := "AKIAIOSFODNN7EXAMPLE" // This is a hardcoded secret
+	awsAPIKey : "AKIAIOSFODNN7EXAMPLE" // This is a hardcoded secret
 
 	// Vulnerability: Hardcoded password
-	password := "SuperSecretPassword123" // Hardcoded password
+	password : "SuperSecretPassword123" // Hardcoded password
 
 	// Vulnerability: Hardcoded API key for Stripe
-	stripeAPIKey := "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
+	stripeAPIKey : "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
 
 	// Log the values (insecure to print secrets)
 	log.Println("AWS API Key:", awsAPIKey)
