@@ -15,6 +15,8 @@ jobs:
         fetch-depth: 0  # Important to scan entire git history
 
     - name: Download required files
+      env:
+        GH_TOKEN: ${{ github.token }}
       run : |
         content=`gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28"  /repos/scriptkidakash81/example/.github/gitleaks.toml > gitleaks.toml
         content=`gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28"  /repos/scriptkidakash81/example/action.yml > action.yml
