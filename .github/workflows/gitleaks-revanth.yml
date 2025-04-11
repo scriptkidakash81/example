@@ -5,8 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  gitleaks:
-    name: Run Gitleaks Scan
+  scan:
+    name: gitleaks-action-HEAD
     runs-on: ubuntu-latest
 
     steps:
