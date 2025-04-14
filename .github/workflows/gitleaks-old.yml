@@ -1,10 +1,10 @@
-name: gitleaks-old
+name: gitleaks-action-HEAD
 on:
   pull_request:
 
 jobs:
   scan:
-    name: gitleaks-old
+    name: gitleaks-action-HEAD
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
