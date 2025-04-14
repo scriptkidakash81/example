@@ -1,4 +1,4 @@
-name: gitleaks-copy
+name: gitleaks-try-1
 on:
   pull_request:
 
