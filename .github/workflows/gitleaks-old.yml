@@ -4,16 +4,24 @@ on:
   pull_request:
     branches:
       - main
-      
+
 jobs:
-  scan:
-    name: gitleaks-action-HEAD
+  gitleaks:
+    name: Run Gitleaks Scan
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: main
-          uses: ./ # Runs the action that's in the root directory of the repo checked out above. i.e. This action itself.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Download required files
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Run Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      with:
+        config-path: .github/gitleaks.toml  # Optional: Use your own config
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
