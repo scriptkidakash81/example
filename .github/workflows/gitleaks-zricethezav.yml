@@ -1,4 +1,4 @@
-name: gitleaks
+name: gitleaks-zricethezav
 on:
   pull_request:
     branches:
@@ -6,7 +6,7 @@ on:
   
 jobs:
   scan:
-    name: gitleaks
+    name: gitleaks-zricethezav
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'gitleaks/gitleaks' }}
     steps:
