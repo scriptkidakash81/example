@@ -35,6 +35,3 @@ func processStripePayment(apiKey string) {
 	fmt.Println("Processing payment with Stripe API key:", apiKey)
 }
 #test
-#test3
-##
-##
