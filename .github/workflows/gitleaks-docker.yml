@@ -19,7 +19,7 @@ jobs:
       - name: Run gitleaks-docker
         run: |
           docker pull zricethezav/gitleaks:latest
-          docker run -v ${{ github.workspace }}:/repo zricethezav/gitleaks:latest detect --source=/repo
+          docker run -v ${{ github.workspace }}:/repo zricethezav/gitleaks:latest detect --source=/repo --verbose -f json -r gitleaks-results.json
       
       - name: Display Gitleaks JSON Output
         run: |
