@@ -1,8 +1,8 @@
-name: gitleaks
+name: gitleaks-try-1
 on: [push, workflow_dispatch]
 jobs:
   scan:
-    name: gitleaks
+    name: gitleaks-try-1
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'gitleaks/gitleaks' }}
     steps:
