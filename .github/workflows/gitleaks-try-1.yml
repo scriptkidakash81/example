@@ -4,13 +4,18 @@ on:
 
 jobs:
   scan:
-    name: gitleaks-action-HEAD
+    name: gitleaks-try-1
     runs-on: ubuntu-latest
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./ # Runs the action that's in the root directory of the repo checked out above. i.e. This action itself.
+      - name: Run Gitleaks
+        uses: ./ # Runs the action that's in the root directory of the repo checked out above. i.e. This action itself.
+        with:
+          config-path: .github/gitleaks.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
