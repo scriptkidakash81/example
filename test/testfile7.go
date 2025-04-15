@@ -10,7 +10,7 @@ func main() {
 	awsAPIKey : "AKIAIOSFODNN7EXAMPLE" // This is a hardcoded secret
 
 	// Vulnerability: Hardcoded password
-	password : "SuperSecretPassword123" // Hardcoded password
+	password : "SecretPassword123" // Hardcoded password
 
 	// Vulnerability: Hardcoded API key for Stripe
 	stripeAPIKey : "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
@@ -34,7 +34,3 @@ func processStripePayment(apiKey string) {
 	// Simulate Stripe payment processing
 	fmt.Println("Processing payment with Stripe API key:", apiKey)
 }
-#test
-#test3
-##
-##
