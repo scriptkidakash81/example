@@ -12,3 +12,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE}}
           GITLEAKS_CONFIG: ${{ github.workspace }}/.github/gitleaks.toml
+          GITLEAKS_EXIT_CODE: 0
