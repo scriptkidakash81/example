@@ -33,9 +33,4 @@ jobs:
 
       - name: Run Gitleaks with custom exit code
         run: |
-          gitleaks detect \
-            --config=.github/gitleaks.toml \
-            --exit-code=0 \
-            --report-format=sarif \
-            --report-path=results.sarif \
-            --verbose
+          gitleaks detect -v --exit-code=0 --report-format=sarif --report-path=results.sarif
