@@ -1,7 +1,7 @@
 name: Gitleaks Custom Run
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
