@@ -16,6 +16,7 @@ func main() {
 	stripeAPIKey : "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
 
 	// Log the values (insecure to print secrets)
+	google_map: "AIzaSyDaGmWKa4JsXZ-HjGw7ISLn_3namBGewQe"
 	log.Println("AWS API Key:", awsAPIKey)
 	log.Println("Password:", password)
 	log.Println("Stripe API Key:", stripeAPIKey)
@@ -37,4 +38,4 @@ func processStripePayment(apiKey string) {
 #test
 #test3
 ##
-##
+
