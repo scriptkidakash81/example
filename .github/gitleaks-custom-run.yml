@@ -10,13 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Download and install latest Gitleaks (tar.gz)
+      - name: Download and install latest Gitleaks
         run: |
           # Get the latest version number (e.g., 8.24.3 — no 'v' prefix)
           LATEST_VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name | sed 's/^v//')
-
           echo "Latest Gitleaks version: $LATEST_VERSION"
 
           # Build the download URL for tar.gz (linux x64)
