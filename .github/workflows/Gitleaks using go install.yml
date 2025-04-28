@@ -17,13 +17,11 @@ jobs:
         run: |
           go install github.com/zricethezav/gitleaks@latest
           which gitleaks
-          
-          # Verify
-          /usr/bin/gitleaks version
+          gitleaks version
 
       - name: Run Gitleaks with custom exit code
         run: |
-          /usr/bin/gitleaks detect -v --exit-code=0 -f=json > gitleaks-results.json
+          gitleaks detect -v --exit-code=0 -f=json > gitleaks-results.json
 
       - name: Display Gitleaks JSON Output
         run: |
