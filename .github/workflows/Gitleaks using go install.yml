@@ -16,6 +16,7 @@ jobs:
       - name: Download and install latest Gitleaks
         run: |
           go install github.com/zricethezav/gitleaks@latest
+          which gitleaks
           
           # Verify
           /usr/bin/gitleaks version
