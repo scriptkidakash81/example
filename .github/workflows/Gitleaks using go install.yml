@@ -1,0 +1,31 @@
+name: Gitleaks using go install
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download and install latest Gitleaks
+        run: |
+          # Get the latest version number (e.g., 8.24.3 — no 'v' prefix)
+          go install github.com/zricethezav/gitleaks@latest
+          
+          # Verify
+          gitleaks version
+
+      - name: Run Gitleaks with custom exit code
+        run: |
+          gitleaks detect -v --exit-code=0 -f=json > gitleaks-results.json
+
+      - name: Display Gitleaks JSON Output
+        run: |
+         echo "Displaying Gitleaks results..."
+         cat gitleaks-results.json
