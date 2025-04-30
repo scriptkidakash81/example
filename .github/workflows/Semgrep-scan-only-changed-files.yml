@@ -1,4 +1,4 @@
-name: Semgrep-new
+name: Semgrep-scan-only-changed-files
 
 on:
   pull_request:
