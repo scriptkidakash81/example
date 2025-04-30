@@ -1,8 +1,14 @@
 package main
 
 import (
+	"crypto/md5"
+	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
+	"os/exec"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -23,6 +29,47 @@ func main() {
 	// Performing some tasks with the credentials
 	processAWSRequest(awsAPIKey)
 	processStripePayment(stripeAPIKey)
+
+	// Vulnerability: SQL injection
+	db, err : sql.Open("mysql", "user:password@/dbname")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	userInput : "Robert'); DROP TABLE users; --"
+	query : fmt.Sprintf("SELECT * FROM users WHERE name = '%s'", userInput)
+	_, err = db.Exec(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Vulnerability: Command injection
+	cmd : exec.Command("sh", "-c", "echo "+userInput)
+	output, err : cmd.CombinedOutput()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(output))
+
+	// Vulnerability: Weak password hashing
+	hash : md5.Sum([]byte(password))
+	fmt.Println("Password hash:", hash)
+
+	// Vulnerability: Insecure HTTP client
+	resp, err : http.Get("http://example.com")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// Vulnerability: Missing HTTPS verification
+	httpClient : &http.Client{}
+	httpClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
 }
 
 func processAWSRequest(apiKey string) {
@@ -34,7 +81,3 @@ func processStripePayment(apiKey string) {
 	// Simulate Stripe payment processing
 	fmt.Println("Processing payment with Stripe API key:", apiKey)
 }
-#test
-#test3
-##
-##
