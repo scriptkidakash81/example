@@ -1,0 +1,70 @@
+name: Semgrep-new
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Get merge base
+        run: |
+          git fetch origin ${GITHUB_BASE_REF:-main}
+          MERGE_BASE=$(git merge-base HEAD origin/${GITHUB_BASE_REF:-main})
+          echo "MERGE_BASE=$MERGE_BASE" >> $GITHUB_ENV
+          echo "Using merge base commit: $MERGE_BASE"
+          echo "Merge base commit details:"
+          git show --no-patch --format="Commit Date: %cd%nCommit Author: %an%nCommit Message: %s" $MERGE_BASE
+
+      - name: Get PR information
+        run: |
+          echo "PR Number: ${{ github.event.pull_request.number }}"
+          echo "PR Title: ${{ github.event.pull_request.title }}"
+          echo "PR Actor: ${{ github.actor }}"
+          echo "PR Branch: ${{ github.head_ref }}"
+          echo "Target Branch: ${{ github.base_ref }}"
+
+      - name: Install Semgrep
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install semgrep
+
+      - name: Scan PR branch with baseline
+        run: |
+          source .venv/bin/activate
+          semgrep --config auto --baseline-commit $MERGE_BASE --json-output=results.json
+          cat results.json | jq .results > ./pretty-results.json
+
+      - name: Flag newly introduced vulnerabilities
+        run: |
+          # Read Semgrep results and filter for high severity errors
+          FINDINGS=$(cat ./pretty-results.json | jq '[.[] | select(.extra.severity == "ERROR")]')
+
+          # Prepare the PR comment based on findings
+          if [ "$(echo "$FINDINGS" | jq 'length')" -gt 0 ]; then
+            COMMENT="**Semgrep Findings:** New vulnerabilites are introduced, Please resolve the issues before merging."
+          else
+            COMMENT="**Semgrep Findings:** No New issues were introduced, Good to merge, However please check and address any other existing issues."
+          fi
+
+          # Post the comment on the PR using the GitHub API
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            -d "{\"body\":\"$COMMENT\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
