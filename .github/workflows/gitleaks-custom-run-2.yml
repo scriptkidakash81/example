@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Gitleaks with custom exit code
         run: |
-          gitleaks git -v --config=gitleaks.toml --exit-code=0 --report-format=json --report-path=gitleaks-results.json
+          gitleaks git -v --config=.github/gitleaks.toml --exit-code=0 --report-format=json --report-path=gitleaks-results.json
 
       - name: Displaying the results
         run: |
