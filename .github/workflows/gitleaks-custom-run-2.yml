@@ -1,6 +1,7 @@
 name: Gitleaks Custom Run 2
 
 on:
+  workflow_call:
   pull_request:
     branches:
       - main
