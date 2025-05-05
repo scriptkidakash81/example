@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write  # Grant permission to write comments on issues and PRs
+  pull-requests: write  # Grant permission to write comments on PRs
+
 jobs:
   build:
     runs-on: ubuntu-latest
