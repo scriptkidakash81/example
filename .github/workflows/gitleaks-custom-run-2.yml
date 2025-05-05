@@ -33,13 +33,13 @@ jobs:
 
       - name: Run Gitleaks with custom exit code
         run: |
-          gitleaks git -v --config=.github/gitleaks.toml --exit-code=0 --report-format=json --report-path=gitleaks-results.json
+          gitleaks git -v --config=gitleaks.toml --exit-code=0 --report-format=json --report-path=gitleaks-results.json
 
       - name: Displaying the results
         run: |
           cat gitleaks-results.json
 
-      - name: Commenting if newly introduced vulnerabilities found
+      - name: Flag newly introduced vulnerabilities
         run: |
           # Read gitleaks results
           FINDINGS=$(cat gitleaks-results.json)
@@ -52,9 +52,12 @@ jobs:
             COMMENT="**Gitleaks Findings:** No new issues were introduced. Good to merge! However, please check and address any other existing issues."
           fi
 
+          # Escape newline characters for JSON
+          COMMENT=${COMMENT//$'\n'/\\n}
+
           # Post the comment on the PR using the GitHub API
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            -d "{\'body\':\'$COMMENT\'}" \
+            -d "{\"body\":\"$COMMENT\"}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
