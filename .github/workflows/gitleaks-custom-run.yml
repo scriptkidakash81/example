@@ -7,4 +7,4 @@ on:
 
 jobs:
   call-gitleaks:
-    uses: git-central/.github/workflows/gitleaks.yml@main
+    uses: scriptkidakash81/git-central/.github/workflows/gitleaks.yml@main
