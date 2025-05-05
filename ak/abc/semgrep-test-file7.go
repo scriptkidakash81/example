@@ -1,40 +1,25 @@
-package main
+# Test script with potential secrets
 
-import (
-	"fmt"
-	"log"
-)
+# Hardcoded AWS credentials
+AWS_ACCESS_KEY_ID="AKIAIOSFODNN7EXAMPLE"
+AWS_SECRET_ACCESS_KEY="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
 
-func main() {
-	// Vulnerability: Hardcoded credentials - AWS API Key
-	awsAPIKey : "AKIAIOSFODNN7EXAMPLE" // This is a hardcoded secret
+# Hardcoded Google API key
+GOOGLE_API_KEY="AIzaSyBdG5TAXTY472625EXAMPLE"
 
-	// Vulnerability: Hardcoded password
-	password : "SuperSecretPassword123" // Hardcoded password
+# Hardcoded database credentials
+DB_USERNAME="admin"
+DB_PASSWORD="mysecretpassword"
+DB_HOST="localhost"
+DB_PORT=5432
 
-	// Vulnerability: Hardcoded API key for Stripe
-	stripeAPIKey : "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
+# Hardcoded Slack token
+SLACK_TOKEN="xoxb-123456789012-1234567890123-abc123def456"
 
-	// Log the values (insecure to print secrets)
-	log.Println("AWS API Key:", awsAPIKey)
-	log.Println("Password:", password)
-	log.Println("Stripe API Key:", stripeAPIKey)
+# Hardcoded private key
+PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAn1pMVSEDO4EPzQxKgAakFxRgMGiewWZFAktenWo5aMt/OIso
+...
+-----END RSA PRIVATE KEY-----"
 
-	// Performing some tasks with the credentials
-	processAWSRequest(awsAPIKey)
-	processStripePayment(stripeAPIKey)
-}
-
-func processAWSRequest(apiKey string) {
-	// Simulate AWS request processing
-	fmt.Println("Processing AWS request with API key:", apiKey)
-}
-
-func processStripePayment(apiKey string) {
-	// Simulate Stripe payment processing
-	fmt.Println("Processing payment with Stripe API key:", apiKey)
-}
-#test
-#test3
-##
-##
+echo "This script contains potential secrets"
