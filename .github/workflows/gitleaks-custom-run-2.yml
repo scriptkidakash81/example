@@ -39,15 +39,14 @@ jobs:
         run: |
           cat gitleaks-results.json
 
-      - name: Flag newly introduced vulnerabilities
+      - name: Flag newly introduced vulnerabilities and Comment on PR
         run: |
           # Read gitleaks results
           FINDINGS=$(cat gitleaks-results.json)
 
           # Check if findings exist
           if [ "$(echo "$FINDINGS" | jq 'length')" -gt 0 ]; then
-            COMMENT="**Gitleaks Findings:** New vulnerabilities are introduced. Please resolve the issues before merging.\n\n"
-            COMMENT+=$(echo "$FINDINGS" | jq -r '.[] | "* Rule ID: \(.RuleID)\n  Description: \(.Description)\n  File: \(.File)\n  Line: \(.StartLine)\n\n'")
+            COMMENT="**Gitleaks Findings:** New vulnerabilities are introduced. Please resolve the issues before merging."
           else
             COMMENT="**Gitleaks Findings:** No new issues were introduced. Good to merge! However, please check and address any other existing issues."
           fi
