@@ -1,40 +1,55 @@
 package main
 
 import (
+	"crypto/md5"
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
+	"os/exec"
+	"strings"
 )
 
 func main() {
-	// Vulnerability: Hardcoded credentials - AWS API Key
-	awsAPIKey : "AKIAIOSFODNN7EXAMPLE" // This is a hardcoded secret
+	// Critical severity vulnerability: Use of weak MD5 hash
+	hash := md5.Sum([]byte("password123"))
+	fmt.Printf("MD5 Hash: %x\n", hash)
 
-	// Vulnerability: Hardcoded password
-	password : "SuperSecretPassword123" // Hardcoded password
+	// Critical severity vulnerability: Use of insecure random number generator
+	buf := make([]byte, 16)
+	rand.Read(buf)
+	fmt.Printf("Random bytes: %x\n", buf)
 
-	// Vulnerability: Hardcoded API key for Stripe
-	stripeAPIKey : "sk_live_4eC39HqLyjWDarjtT1zdp7dc" // Stripe API key
+	// Critical severity vulnerability: Use of insecure deserialization
+	jsonStr := `{"name":"John","admin":true}`
+	var data map[string]interface{}
+	if err := json.Unmarshal([]byte(jsonStr), &data); err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Deserialized data: %+v\n", data)
 
-	// Log the values (insecure to print secrets)
-	log.Println("AWS API Key:", awsAPIKey)
-	log.Println("Password:", password)
-	log.Println("Stripe API Key:", stripeAPIKey)
+	// Critical severity vulnerability: Command injection
+	cmd := fmt.Sprintf("ping -c 1 %s", "example.com")
+	output, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Printf("Command output: %s\n", output)
 
-	// Performing some tasks with the credentials
-	processAWSRequest(awsAPIKey)
-	processStripePayment(stripeAPIKey)
+	// Critical severity vulnerability: Insecure use of net/http
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("Hello, World!"))
+	})
+	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	// Critical severity vulnerability: Use of insecure base64 encoding
+	encodedStr := base64.StdEncoding.EncodeToString([]byte("secret data"))
+	fmt.Printf("Base64 encoded string: %s\n", encodedStr)
+
+	// Critical severity vulnerability: Use of insecure string concatenation
+	userInput := "example.com"
+	url := "http://" + userInput + "/api/data"
+	fmt.Printf("Concatenated URL: %s\n", url)
 }
-
-func processAWSRequest(apiKey string) {
-	// Simulate AWS request processing
-	fmt.Println("Processing AWS request with API key:", apiKey)
-}
-
-func processStripePayment(apiKey string) {
-	// Simulate Stripe payment processing
-	fmt.Println("Processing payment with Stripe API key:", apiKey)
-}
-#test
-#test3
-##
-##
