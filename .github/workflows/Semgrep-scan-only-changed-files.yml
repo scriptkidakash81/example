@@ -50,6 +50,11 @@ jobs:
           semgrep --verbose --config auto --baseline-commit $MERGE_BASE --json-output=results.json
           cat results.json | jq .results > ./pretty-results.json
 
+      - name: Display Raw Semgrep JSON Output
+        run: |
+         echo "Displaying raw Semgrep results..."
+         cat pretty-results.json
+
       - name: Flag newly introduced vulnerabilities
         run: |
           # Read Semgrep results and filter for high severity errors
