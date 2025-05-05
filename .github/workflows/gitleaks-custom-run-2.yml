@@ -5,6 +5,11 @@ on:
     branches:
       - main
 
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -18,40 +23,33 @@ jobs:
           # Get the latest version number (e.g., 8.24.3 — no 'v' prefix)
           LATEST_VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name | sed 's/^v//')
           echo "Latest Gitleaks version: $LATEST_VERSION"
-
           # Build the download URL for tar.gz (linux x64)
           DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/download/v${LATEST_VERSION}/gitleaks_${LATEST_VERSION}_linux_x64.tar.gz"
-
           # Download and extract
           curl -sSL "$DOWNLOAD_URL" -o gitleaks.tar.gz
           tar -xzf gitleaks.tar.gz
           chmod +x gitleaks
           sudo mv gitleaks /usr/local/bin
-
           # Verify
           gitleaks version
-
       - name: Run Gitleaks with custom exit code
         run: |
           gitleaks git -v --config=.github/gitleaks.toml --exit-code=0 --report-format=json --report-path=gitleaks-results.json
-
       - name: Displaying the results
         run: |
           cat gitleaks-results.json
-
-      - name: Commenting if newly introduced vulnerabilities found
+      - name: Flag newly introduced vulnerabilities and Comment on PR
         run: |
           # Read gitleaks results
           FINDINGS=$(cat gitleaks-results.json)
-
           # Check if findings exist
           if [ "$(echo "$FINDINGS" | jq 'length')" -gt 0 ]; then
-            COMMENT="**Gitleaks Findings:** New vulnerabilities are introduced. Please resolve the issues before merging.\n\n"
-            COMMENT+=$(echo "$FINDINGS" | jq -r '.[] | "* Rule ID: \(.RuleID)\n  Description: \(.Description)\n  File: \(.File)\n  Line: \(.StartLine)\n\n'")
+            COMMENT="**Gitleaks Findings:** New vulnerabilities are introduced. Please resolve the issues before merging."
           else
             COMMENT="**Gitleaks Findings:** No new issues were introduced. Good to merge! However, please check and address any other existing issues."
           fi
-
+          # Escape newline characters for JSON
+          COMMENT=${COMMENT//$'\n'/\\n}
           # Post the comment on the PR using the GitHub API
           curl -X POST \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
