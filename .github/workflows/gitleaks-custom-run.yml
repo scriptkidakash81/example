@@ -1,4 +1,4 @@
-name: Gitleaks Custom Run
+name: Gitleaks scan central repository
 
 on:
   pull_request:
@@ -6,31 +6,5 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Download and install latest Gitleaks
-        run: |
-          # Get the latest version number (e.g., 8.24.3 — no 'v' prefix)
-          LATEST_VERSION=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | jq -r .tag_name | sed 's/^v//')
-          echo "Latest Gitleaks version: $LATEST_VERSION"
-
-          # Build the download URL for tar.gz (linux x64)
-          DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/download/v${LATEST_VERSION}/gitleaks_${LATEST_VERSION}_linux_x64.tar.gz"
-
-          # Download and extract
-          curl -sSL "$DOWNLOAD_URL" -o gitleaks.tar.gz
-          tar -xzf gitleaks.tar.gz
-          chmod +x gitleaks
-          sudo mv gitleaks /usr/local/bin
-
-          # Verify
-          gitleaks version
-
-      - name: Run Gitleaks with custom exit code
-        run: |
-          gitleaks detect -v --exit-code=0 --report-format=sarif --report-path=results.sarif
+  call-gitleaks:
+    uses: git-central/.github/workflows/gitleaks.yml@main
