@@ -57,6 +57,7 @@ paths = [
     '''Database.refactorlog''',
     '''gitleaks-test-script\.py''',
     '''semgrep-test-file7\.go''',
+    '''index\.js''',
 ]
 stopwords = [
     "abcdefghijklmnopqrstuvwxyz",
