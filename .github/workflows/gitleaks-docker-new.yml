@@ -25,7 +25,7 @@ jobs:
             -e GITLEAKS_CONFIG=/repo/.github/gitleaks.toml \
             -e GITLEAKS_EXIT_CODE=0 \
             zricethezav/gitleaks:latest \
-            detect --source=/repo --verbose --config=$GITLEAKS_CONFIG --exit-code=$GITLEAKS_EXIT_CODE -f json -r gitleaks-results.json
+            detect --source=/repo --verbose --config=$GITLEAKS_CONFIG --exit-code 0 -f json -r gitleaks-results.json
           echo "Gitleaks scan finihed"
 
       - name: Setup Python
