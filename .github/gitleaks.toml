@@ -55,14 +55,13 @@ paths = [
     '''\.gem$''',
     '''verification-metadata\.xml''',
     '''Database.refactorlog''',
+    '''gitleaks-test-script\.py''',
+    '''semgrep-test-file7\.go''',
 ]
 stopwords = [
     "abcdefghijklmnopqrstuvwxyz",
     "014df517-39d1-4453-b7b3-9930c563627c",
 ]
-
-[paths]
-ignore = ["ak/"]
 
 [[rules]]
 id = "1password-service-account-token"
