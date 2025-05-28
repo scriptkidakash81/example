@@ -1,0 +1,42 @@
+name: gitleaks-docker-new
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Run gitleaks-docker
+        run: |
+          docker pull zricethezav/gitleaks:latest
+          docker run \
+            -v ${{ github.workspace }}:/repo \
+            -e GITLEAKS_CONFIG=/repo/.github/gitleaks.toml \
+            -e GITLEAKS_EXIT_CODE=0 \
+            zricethezav/gitleaks:latest \
+            detect --source=/repo --verbose --config=$GITLEAKS_CONFIG --report-format=json --report-path=/repo/gitleaks-results.json
+          echo "Gitleaks scan finihed"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies and Run Python script
+        run: |
+          pip install pandas requests tabulate
+          python gitleaks-result-convert-script.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
