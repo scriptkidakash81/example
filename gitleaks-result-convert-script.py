@@ -18,7 +18,15 @@ field_mapping = {
 }
 
 # Extract the fields and rename them
-extracted_data = [{field_mapping.get(field, field): item[field_mapping.get(field, field)] for field in fields} for item in data]
+extracted_data = []
+for item in data:
+    extracted_item = {}
+    for field in fields:
+        if field in field_mapping:
+            extracted_item[field_mapping[field]] = item.get(field)
+        else:
+            extracted_item[field] = item.get(field)
+    extracted_data.append(extracted_item)
 
 # Convert the extracted data to a Pandas DataFrame
 df = pd.DataFrame(extracted_data)
