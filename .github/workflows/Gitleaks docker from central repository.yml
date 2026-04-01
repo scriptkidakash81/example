@@ -1,0 +1,15 @@
+name: Gitleaks docker from central repository
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+jobs:
+  call-gitleaks:
+    uses: scriptkidakash81/git-central/.github/workflows/gitleaks-docker.yml@main
